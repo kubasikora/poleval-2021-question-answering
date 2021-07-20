@@ -47,7 +47,7 @@ services:
         target: /var/log/rabbitmq
     
   poleval:
-    build: .
+    build: ./src
     container_name: poleval
     
 volumes:
