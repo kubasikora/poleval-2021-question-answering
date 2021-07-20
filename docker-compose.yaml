@@ -44,8 +44,12 @@ services:
     volumes: 
       - type: volume
         source: logs
-        target: /var/log/rabbitmq    
-
+        target: /var/log/rabbitmq
+    
+  poleval:
+    build: .
+    container_name: poleval
+    
 volumes:
   esdata:
   logs:
