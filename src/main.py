@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-import logging
+import logging, sys, os
 from MQConnection import MQConnection
 
 LOG_FORMAT = "%(levelname)-5s %(name)s: %(message)s"
@@ -10,5 +10,15 @@ if __name__ == "__main__":
     logger.info("Hello world!")
 
     mq = MQConnection()
-    mq.connect('amqp://localhost:5672/%2f')
-    mq.stop()
+    mq.connect("amqp://localhost:5672/%2f")
+    mq.register("hello", lambda channel, method, properties, body: logger.info(f"Received {str(body)}"))
+
+    try:
+        mq.spin()
+    except KeyboardInterrupt:
+        logger.info('Interrupted')
+        try:
+            mq.stop()
+            sys.exit(0)
+        except SystemExit:
+            os._exit(0)
