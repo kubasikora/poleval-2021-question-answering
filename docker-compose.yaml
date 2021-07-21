@@ -34,8 +34,10 @@ services:
       - type: volume
         source: logs
         target: /var/logs
+    depends_on: 
+      - elasticsearch
 
-  rabbitmq:
+  mq:
     image: rabbitmq:3-management-alpine
     container_name: mq
     ports: 
@@ -51,6 +53,9 @@ services:
     container_name: poleval
     environment: 
       MQURL: amqp://mq:5672/%2f
+    depends_on: 
+      - mq
+      - elasticsearch
     
 volumes:
   esdata:
