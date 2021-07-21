@@ -10,7 +10,7 @@ if __name__ == "__main__":
     logger.info("Hello world!")
 
     mq = MQConnection()
-    mq.connect("amqp://localhost:5672/%2f")
+    mq.connect(os.environ['MQURL'])
     mq.register("hello", lambda channel, method, properties, body: logger.info(f"Received {str(body)}"))
 
     try:

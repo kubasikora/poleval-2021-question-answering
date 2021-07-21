@@ -49,6 +49,8 @@ services:
   poleval:
     build: ./src
     container_name: poleval
+    environment: 
+      MQURL: amqp://mq:5672/%2f
     
 volumes:
   esdata:
