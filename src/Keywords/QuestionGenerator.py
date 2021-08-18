@@ -2,8 +2,13 @@ import spacy
 from nltk.corpus import stopwords
 import stanza
 import spacy_stanza
+import re
 
 CONTENT_POS = ['ADJ','ADV','NOUN','PROPN','VERB']
+
+## TODO change stanza on udpipe
+## TODO adjust to many questions (remove loop in main)
+## TODO 
 
 class QuestionGenerator :
 
@@ -27,6 +32,8 @@ class QuestionGenerator :
         questions["functional_lemma"] = functional[1]
         questions["pairsAN"] = self._extractNounAdj(doc)
         questions["pairsNA"] = self._extractAdjNoun(doc)
+        questions['quotations'] = self._extractQuotation(text)
+        questions['capitalLetters'] = self._extractCapitalLetters(text)
         return questions
 
     def _extractKeywords(self, text):
@@ -80,6 +87,35 @@ class QuestionGenerator :
             else :
                 flag = False
         return tokens
+    
+    def _extractQuotation(self, text):
+        quotations = text.split('"')[1::2]
+        return quotations
+
+
+    def _extractCapitalLetters(self,text) :
+        #print(text)
+        quot = []
+        quots = []
+        sentences = re.split('\. |\? ', text)
+        for sentence in sentences :
+            flag = False
+            words = sentence.split(' ')
+            for i,word in enumerate(words) :
+                word = word.replace('.', '')
+                word = word.replace('?', '')
+                if len(word) :
+                    if word[0].isupper() and i != 0 :
+                        flag = True
+                    elif flag and not word[0].isupper() :
+                        quots.append(' '.join(quot))
+                        flag = False
+                    else :
+                        flag = False
+                    if flag :
+                        quot.append(word)
+        return quots
+
 
 
             
