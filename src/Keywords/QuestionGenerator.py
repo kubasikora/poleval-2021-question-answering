@@ -70,7 +70,10 @@ class QuestionGenerator :
         
     def _extractKeywords(self, text):
         doc = self.nlp_spacy(text)
-        return doc.ents
+        keyword = []
+        for ent in doc.ents :
+            keyword.append(str(ent))
+        return keyword
 
     def _extractQuestionWithoutStopwords(self,doc):
         tokens_lemma = []
