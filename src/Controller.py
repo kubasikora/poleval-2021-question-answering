@@ -20,10 +20,20 @@ class Controller :
         self.logger.info(f"Received {literal_eval(str(body)).decode('utf8')}")
         self.generated_questions = self.qa.generateQuestion(literal_eval(str(body)).decode('utf8'))
         self.logger.info(f"Generated questions {self.generated_questions}")
+        self.mq.publish(queue='elasticSearch', body=self.generated_questions)
 
-    def register(self, task = "questionGenrator"):
+    def callback_elasticSearch(self, ch, method, properties, body):
+        self.logger.info(f"Received {literal_eval(str(body)).decode('utf8')}")
+
+    def register_question_generator(self):
         self.mq.register("questionGenerator", self.callback_questionGenerator)
     
+    def register_elastic_search(self):
+        self.mq.register("elasticSearch", self.callback_elasticSearch)
+    
+    def get_generated_question(self):
+        return self.generated_questions
+
     def spin(self):
         self.mq.spin()
     

@@ -38,3 +38,9 @@ class MQConnection:
     def spin(self) -> None:
         MQConnection.logger.info("Waiting for messages")
         self.channel.start_consuming()
+    
+    def publish(self, queue, body) :
+        MQConnection.logger.info(f"Published message to {queue}: {body}")
+        self.channel.basic_publish(exchange='', routing_key=queue, body=body)
+
+    
