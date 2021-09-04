@@ -32,10 +32,35 @@ class AnswersReplier:
 
     
     def getAnswer(self, question, context):
+        #print(context)
         output = self.qa_pipeline({
                     'context': context,
                     'question': question
                     })
-        print(output)
-        AnswersReplier.logger.info(f"[Q]: {question} \n [A]: {output['answer']} \n [score]: {output['score']}")
+        #AnswersReplier.logger.info(f"[Q]: {question} \n [A]: {output['answer']} \n [score]: {output['score']}")
         return output
+
+    def split_documents2contexts(self, documents):
+        contexts = []
+        i = 0
+        max_docs = min(5, len(documents)) ## some param..?
+        while i < max_docs:
+            #contexts.append(documents[i].abstract)
+            ##TODO: split text into smaller pieces 
+            contexts.append(documents[i].text)
+            i+=1
+        return contexts
+
+    def get_answers(self, question, contexts):
+        outputs = []
+        for context in contexts:
+            if context is not None:
+                output = self.getAnswer(question, context)
+                outputs.append(output)
+        return outputs
+
+    def get_best_answer(self, documents, question):
+        contexts = self.split_documents2contexts(documents)
+        outputs = self.get_answers(question, contexts)
+        best_answer = max(outputs, key=lambda output: output['score'])
+        return best_answer
