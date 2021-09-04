@@ -1,4 +1,4 @@
-export es=localhost:9200
+export es=http://elastic.kubasikora.rocks
 export index=poleval
 cd chunks
 for file in *; do

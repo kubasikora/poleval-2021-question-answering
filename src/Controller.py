@@ -1,6 +1,7 @@
 import logging, sys, os
 from Keywords.QuestionGenerator import QuestionGenerator
 from MQConnection import MQConnection
+from Document import Elastic, Document
 from ast import literal_eval
 import json
 
@@ -15,13 +16,17 @@ class Controller :
         self.logger = logging.getLogger("main")
         self.logger.info("Connecting to MQ")
         self.mq.connect(os.environ['MQURL'])
-        self.generated_questions = {}   
+        print({ 'host': os.environ['ESHOST'], 'port': int(os.environ['ESPORT']) })
+        self.es = Elastic({ 'host': os.environ['ESHOST'], 'port': int(os.environ['ESPORT']) }, 'poleval')
+        self.generated_questions = {}
+        self.documents = []
     
     def callback_questionGenerator(self,ch, method, properties, body):
         self.logger.info(f"Received {literal_eval(str(body)).decode('utf8')}")
         self.generated_questions = self.qa.generateQuestion(literal_eval(str(body)).decode('utf8'))
         self.logger.info(f"Generated questions {self.generated_questions}")
-        self.mq.publish(queue='elasticSearch', body=json.dumps(self.generated_questions))
+        self.get_documents()    
+        # self.mq.publish(queue='elasticSearch', body=json.dumps(self.generated_questions))
 
     def publish(self, queue, body):
         self.mq.publish(queue, body)
@@ -37,6 +42,17 @@ class Controller :
     
     def get_generated_question(self):
         return self.generated_questions
+
+    def get_documents(self):
+        self.documents = []
+        document_map = {}
+        for queries in self.generated_questions.values():
+            for query in queries:
+                docs = self.es.get(query)
+                for doc in docs:
+                    document_map[doc.id] = doc
+        self.documents = list(document_map.values())
+        return self.documents
 
     def spin(self):
         self.mq.spin()

@@ -1,16 +1,17 @@
 from elasticsearch6 import Elasticsearch
 
 class Document(object):
-    def __init__(self, title, abstract, text):
-        self.title = title
+    def __init__(self, id, title, abstract, text):
+        self.id       = id
+        self.title    = title
         self.abstract = abstract
-        self.text = text
+        self.text     = text
 
 class Elastic(object):
     def __init__(self, url, index):
         self.elastic_url = url
         self.index = index
-        self.es = Elasticsearch([url], sniff_on_start=True, sniff_on_connection_fail=True)
+        self.es = Elasticsearch([url])
 
     def get(self, query):
         res = self.es.search(
@@ -27,9 +28,13 @@ class Elastic(object):
         items = res['hits']['hits']
         documents = []
         for doc in items:
-            title    = doc['_source']['title']
-            abstract = doc['_source']['opening_text']
-            text     = doc['_source']['text']
-            new_doc  = Document(title, abstract, text)
-            documents.append(new_doc)
+            try:
+                id       = doc['_id']
+                title    = doc['_source']['title']
+                abstract = doc['_source']['opening_text']
+                text     = doc['_source']['text']
+                new_doc  = Document(id, title, abstract, text)
+                documents.append(new_doc)
+            except:
+                pass
         return documents

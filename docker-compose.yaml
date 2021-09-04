@@ -52,6 +52,8 @@ services:
     container_name: poleval
     environment: 
       MQURL: amqp://mq:5672/%2f
+      ESHOST: elastic.kubasikora.rocks
+      ESPORT: 80
     depends_on: 
       - mq
       - elasticsearch
