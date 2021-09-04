@@ -23,6 +23,9 @@ class Controller :
         self.logger.info(f"Generated questions {self.generated_questions}")
         self.mq.publish(queue='elasticSearch', body=json.dumps(self.generated_questions))
 
+    def publish(self, queue, body):
+        self.mq.publish(queue, body)
+        
     def callback_elasticSearch(self, ch, method, properties, body):
         self.logger.info(f"Received {literal_eval(str(body)).decode('utf8')}")
 
@@ -40,3 +43,5 @@ class Controller :
     
     def stop(self):
         self.mq.stop()
+
+    
