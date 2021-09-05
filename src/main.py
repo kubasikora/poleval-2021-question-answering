@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 import logging, sys, os
 from Controller import Controller
+import pandas as pd
 
 LOG_FORMAT = "%(levelname)-5s %(name)s: %(message)s"
 logging.basicConfig(level=logging.INFO, format=LOG_FORMAT)
@@ -22,6 +23,7 @@ if __name__ == "__main__":
     except KeyboardInterrupt:
         logger.info('Interrupted')
         try:
+            pd.DataFrame(controller.results).to_csv("./results.tsv")
             controller.stop()
             sys.exit(0)
         except SystemExit:

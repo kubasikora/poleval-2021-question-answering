@@ -24,6 +24,7 @@ class Controller :
         self.generated_questions = {}
         self.documents = []
         self.responses = []
+        self.results = []
     
     def callback_questionGenerator(self, ch, method, properties, body):
         try:
@@ -47,6 +48,7 @@ class Controller :
             }
         finally:
             try:
+                self.results.append(response)
                 self.mq.channel.basic_ack(delivery_tag=method.delivery_tag)
                 self.mq_pub.publish(queue='answers', body=json.dumps(response))
                 print(json.dumps(response))
