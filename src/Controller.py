@@ -12,11 +12,13 @@ logging.basicConfig(level=logging.INFO, format=LOG_FORMAT)
 class Controller :
     def __init__ (self) :
         self.mq = MQConnection()
+        self.mq_pub = MQConnection()
         self.qa = QuestionGenerator()
         self.ar = AnswersReplier()
         self.logger = logging.getLogger("main")
         self.logger.info("Connecting to MQ")
         self.mq.connect(os.environ['MQURL'])
+        self.mq_pub.connect(os.environ['MQURL'])
         print({ 'host': os.environ['ESHOST'], 'port': int(os.environ['ESPORT']) })
         self.es = Elastic({ 'host': os.environ['ESHOST'], 'port': int(os.environ['ESPORT']) }, 'poleval')
         self.generated_questions = {}
@@ -24,13 +26,29 @@ class Controller :
         self.responses = []
     
     def callback_questionGenerator(self,ch, method, properties, body):
-        self.logger.info(f"Received {literal_eval(str(body)).decode('utf8')}")
-        self.generated_questions = self.qa.generateQuestion(literal_eval(str(body)).decode('utf8'))
-        self.logger.info(f"Generated questions {self.generated_questions}")
-        self.get_documents()
-        best_answer = self.ar.get_best_answer(documents=self.documents, question=literal_eval(str(body)).decode('utf8'))
-        ##{'score': 0.08215310424566269, 'start': 236, 'end': 246, 'answer': 'Warszawie.'} what shall we do about it?
-        # self.mq.publish(queue='elasticSearch', body=json.dumps(self.generated_questions))
+        try:
+            question = json.loads(literal_eval(str(body)).decode('utf8'))
+            self.logger.info(f"Received {question}")
+            self.generated_questions = self.qa.generateQuestion(question['question'])
+            self.logger.info(f"Generated questions {self.generated_questions}")
+            self.get_documents()
+            best_answer = self.ar.get_best_answer(documents=self.documents, question=question['question'])
+            self.logger.info(f"Answer {best_answer}")
+            response = {
+                'id': question['id'],
+                'question': question['question'],
+                'answer': best_answer['answer']
+            }
+        except:
+            response = {
+                'id': question['id'],
+                'question': question['question'],
+                'answer': 'Tak'
+            }
+        finally:
+            self.mq.channel.basic_ack(delivery_tag=method.delivery_tag)
+            self.mq_pub.publish(queue='answers', body=json.dumps(response))
+            print(json.dumps(response))
 
     def publish(self, queue, body):
         self.mq.publish(queue, body)
@@ -38,11 +56,12 @@ class Controller :
     def callback_elasticSearch(self, ch, method, properties, body):
         self.logger.info(f"Received {literal_eval(str(body)).decode('utf8')}")
 
-    def register_question_generator(self):
-        self.mq.register("questionGenerator", self.callback_questionGenerator)
+    def register_replier_queue(self):
+        self.mq.register("questions", self.callback_questionGenerator)
     
-    def register_elastic_search(self):
-        self.mq.register("elasticSearch", self.callback_elasticSearch)
+    def register_answers_queue(self):
+        self.mq_pub.declare('answers')
+        # self.mq_pub.register("answers", self.callback_elasticSearch)
     
     def get_generated_question(self):
         return self.generated_questions

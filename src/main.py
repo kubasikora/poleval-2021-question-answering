@@ -14,8 +14,8 @@ if __name__ == "__main__":
     logger.info("Question-Answer PolEval")
 
     controller = Controller()
-    controller.register_question_generator()
-    controller.register_elastic_search()
+    controller.register_replier_queue()
+    controller.register_answers_queue()
 
     try:
         controller.spin()

@@ -31,9 +31,11 @@ class MQConnection:
         MQConnection.logger.info("Stopped connection")
 
     def register(self, queue: str, callback: Callable) -> None:
-        self.channel.queue_declare(queue=queue)
-        self.channel.basic_consume(queue=queue, on_message_callback=callback, auto_ack=True)
+        self.channel.basic_consume(queue=queue, on_message_callback=callback)
         MQConnection.logger.info(f"Registered consumer to queue {queue}")
+
+    def declare(self, queue: str) -> None:
+        self.channel.queue_declare(queue=queue)
 
     def spin(self) -> None:
         MQConnection.logger.info("Waiting for messages")

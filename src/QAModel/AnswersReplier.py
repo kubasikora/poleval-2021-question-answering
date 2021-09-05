@@ -37,13 +37,13 @@ class AnswersReplier:
                     'context': context,
                     'question': question
                     })
-        #AnswersReplier.logger.info(f"[Q]: {question} \n [A]: {output['answer']} \n [score]: {output['score']}")
+        AnswersReplier.logger.info(f"[Q]: {question} \n [A]: {output['answer']} \n [score]: {output['score']}")
         return output
 
     def split_documents2contexts(self, documents):
         contexts = []
         i = 0
-        max_docs = min(5, len(documents)) ## some param..?
+        max_docs = min(1000, len(documents)) ## some param..?
         while i < max_docs:
             #contexts.append(documents[i].abstract)
             ##TODO: split text into smaller pieces 
