@@ -46,9 +46,12 @@ class Controller :
                 'answer': 'Tak'
             }
         finally:
-            self.mq.channel.basic_ack(delivery_tag=method.delivery_tag)
-            self.mq_pub.publish(queue='answers', body=json.dumps(response))
-            print(json.dumps(response))
+            try:
+                self.mq.channel.basic_ack(delivery_tag=method.delivery_tag)
+                self.mq_pub.publish(queue='answers', body=json.dumps(response))
+                print(json.dumps(response))
+            except:
+                pass
 
     def publish(self, queue, body):
         self.mq.publish(queue, body)

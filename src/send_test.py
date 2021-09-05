@@ -26,7 +26,7 @@ if __name__ == "__main__":
             answer = json.loads(literal_eval(str(body)).decode('utf8'))
             self.results.append(answer['answer'])
             channel.basic_ack(delivery_tag=method.delivery_tag)
-            print(self.results, self.size)
+            print(len(self.results), self.size)
             if len(self.results) == self.size:
                 pd.DataFrame(self.results).to_csv('testB-results.tsv', header=None, index=None, sep=' ')
                 exit(0)
