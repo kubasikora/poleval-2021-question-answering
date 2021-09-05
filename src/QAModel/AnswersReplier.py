@@ -43,7 +43,7 @@ class AnswersReplier:
     def split_documents2contexts(self, documents):
         contexts = []
         i = 0
-        max_docs = min(1000, len(documents)) ## some param..?
+        max_docs = min(15, len(documents)) ## some param..?
         while i < max_docs:
             #contexts.append(documents[i].abstract)
             ##TODO: split text into smaller pieces 

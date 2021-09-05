@@ -25,7 +25,7 @@ class Controller :
         self.documents = []
         self.responses = []
     
-    def callback_questionGenerator(self,ch, method, properties, body):
+    def callback_questionGenerator(self, ch, method, properties, body):
         try:
             question = json.loads(literal_eval(str(body)).decode('utf8'))
             self.logger.info(f"Received {question}")
